@@ -48,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.HorizontalAlignmentLine
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -59,6 +60,7 @@ import coil.Coil
 import coil.compose.rememberImagePainter
 import com.dmersiyanov.learncompose.ui.theme.LearnComposeTheme
 import com.dmersiyanov.learncompose.ui.theme.green2
+import org.intellij.lang.annotations.JdkConstants
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -131,7 +133,6 @@ fun ProfileImage(userProfile: UserProfile, imageSize: Dp = 125.dp) {
         )
     ) {
         Image(
-//            modifier = Modifier.size(imageSize),
             painter = rememberImagePainter(userProfile.pictureUrl),
             contentDescription = "profile",
             contentScale = ContentScale.Crop,
@@ -140,13 +141,18 @@ fun ProfileImage(userProfile: UserProfile, imageSize: Dp = 125.dp) {
 }
 
 @Composable
-fun ProfileContent(userProfile: UserProfile) {
-    Column {
-        Text(text = userProfile.name, modifier = Modifier.padding(end = 16.dp))
+fun ProfileContent(userProfile: UserProfile, alignment: Alignment.Horizontal = Alignment.Start) {
+    Column(horizontalAlignment = alignment) {
+        Text(
+            text = userProfile.name,
+            modifier = Modifier.padding(end = 16.dp),
+            style = MaterialTheme.typography.h5
+        )
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Text(
                 text = if (userProfile.isOnline) "Active now" else "Not active",
-                modifier = Modifier.padding(end = 16.dp)
+                modifier = Modifier.padding(end = 16.dp),
+                style = MaterialTheme.typography.body2
             )
         }
     }
@@ -162,7 +168,7 @@ fun DetailsScreen(userProfile: UserProfile = userProfileList.first()) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 ProfileImage(userProfile, 250.dp)
-                ProfileContent(userProfile)
+                ProfileContent(userProfile, Alignment.CenterHorizontally)
             }
         }
     }
