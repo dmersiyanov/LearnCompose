@@ -38,9 +38,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import coil.compose.rememberImagePainter
 import com.dmersiyanov.learncompose.ui.theme.LearnComposeTheme
 import com.dmersiyanov.learncompose.ui.theme.green2
@@ -63,8 +65,13 @@ fun App(usersList: List<UserProfile> = userProfileList) {
         composable("users_list") {
             MainScreen(usersList, navController)
         }
-        composable("user_details") {
-            DetailsScreen(navController = navController)
+        composable("user_details/{userId}", arguments = listOf(navArgument("userId") {
+            type = NavType.IntType
+        })) {
+            DetailsScreen(
+                navController = navController,
+                userId = it.arguments?.getInt("userId") ?: 0
+            )
         }
     }
 }
@@ -94,7 +101,7 @@ fun MainScreen(usersList: List<UserProfile>, navController: NavController?) {
             LazyColumn(modifier = Modifier.padding(vertical = 8.dp), content = {
                 items(usersList) { user: UserProfile ->
                     ProfileCard(userProfile = user) {
-                        navController?.navigate("user_details")
+                        navController?.navigate("user_details/${user.id}")
                     }
                 }
             })
@@ -103,13 +110,15 @@ fun MainScreen(usersList: List<UserProfile>, navController: NavController?) {
 }
 
 @Composable
-fun ProfileCard(userProfile: UserProfile, onClick: () -> Unit) {
+fun ProfileCard(userProfile: UserProfile, onClick: (userId: Int) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight(align = Alignment.Top)
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = {
+                onClick.invoke(userProfile.id)
+            }),
         elevation = 8.dp
     ) {
         Row(
@@ -163,9 +172,10 @@ fun ProfileContent(userProfile: UserProfile, alignment: Alignment.Horizontal = A
 
 @Composable
 fun DetailsScreen(
-    userProfile: UserProfile = userProfileList.first(),
+    userId: Int,
     navController: NavController?
 ) {
+    val userProfile: UserProfile = userProfileList.first { it.id == userId }
     Scaffold(topBar = { Toolbar(userProfile.name, navController) }) {
         Surface(color = Color.LightGray, modifier = Modifier.fillMaxSize()) {
             Column(
@@ -184,7 +194,7 @@ fun DetailsScreen(
 @Composable
 fun DetailsPreview() {
     LearnComposeTheme {
-        DetailsScreen(navController = null)
+        DetailsScreen(navController = null, userId = 0)
     }
 }
 
